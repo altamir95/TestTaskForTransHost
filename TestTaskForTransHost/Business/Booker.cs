@@ -30,8 +30,8 @@ namespace TestTaskForTransHost.Business
         //Поиск отеля по имени
         public Hotel FindHotel(string hotelName)
         {
-            if (string.IsNullOrWhiteSpace(hotelName) ) return null;
-             hotelName = hotelName.Trim();  
+            if (string.IsNullOrWhiteSpace(hotelName)) return null;
+            hotelName = hotelName.Trim();
 
             var foundHotel = db.Hotels.FirstOrDefault(i => i.Name == hotelName);
 
@@ -64,8 +64,8 @@ namespace TestTaskForTransHost.Business
 
         //зарезервировать номер, с проверкой на бронь и созданием записи клиента по необходимости
         public RoomReservation ReserveRoom(int roomId, ClientModel clientModel)
-        { 
-            if (roomId   <1) return null;
+        {
+            if (roomId < 1) return null;
             if (clientModel == null) return null;
             if (string.IsNullOrWhiteSpace(clientModel.PassportNumber)) return null;
             clientModel.PassportNumber.Trim();
@@ -73,15 +73,15 @@ namespace TestTaskForTransHost.Business
             if (string.IsNullOrWhiteSpace(clientModel.FullName)) return null;
             clientModel.FullName.Trim();
 
-            if (roomId < 1) return null;  
+            if (roomId < 1) return null;
 
             var reservationRoomDate = DateTime.Now.AddDays(BookingDaysCount).Date;
 
-            var isRoomExist = db.Rooms.Any(r =>   r.Id == roomId);
-            if (!isRoomExist) return null;
-
-            var isRoomReservedOrUnexist = db.Reservations.Any(r => r.ReservationDate.Date == reservationRoomDate && r.RoomId == roomId  );
-            if (isRoomReservedOrUnexist) return null;
+            var isRoomReservedOrUnexist = db.Rooms
+                .Include(r => r.RoomReservations)
+                .Any(r => r.Id == roomId && !r.RoomReservations
+                .Any(s => s.ReservationDate.Date == reservationRoomDate && s.RoomId == roomId));
+            if (!isRoomReservedOrUnexist) return null;
 
             var ClientFromDB = new BookingContext()
                .Clients
@@ -92,7 +92,7 @@ namespace TestTaskForTransHost.Business
                 if (string.IsNullOrWhiteSpace(clientModel.FullName)) return null;
                 clientModel.FullName = clientModel.FullName.Trim();
 
-                if (clientModel.DateBirth == new DateTime()) return null; 
+                if (clientModel.DateBirth == new DateTime()) return null;
 
                 ClientFromDB = new Client
                 {
