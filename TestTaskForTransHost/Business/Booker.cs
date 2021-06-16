@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TestTaskForTransHost.Enums;
 using TestTaskForTransHost.Models;
+using TestTaskForTransHost.ViewModels;
 
 namespace TestTaskForTransHost.Business
 {
@@ -18,110 +20,106 @@ namespace TestTaskForTransHost.Business
 
     public class Booker
     {
+        private int BookingDaysCount = 1;
+        BookingContext db;
+
+        public Booker()
+        {
+            db = new BookingContext();
+        }
         //Поиск отеля по имени
         public Hotel FindHotel(string hotelName)
         {
-            Hotel hotel = null;
+            if (string.IsNullOrWhiteSpace(hotelName) ) return null;
+             hotelName = hotelName.Trim();  
 
-            var context = new BookingContext();
+            var foundHotel = db.Hotels.FirstOrDefault(i => i.Name == hotelName);
 
-            var foundHotel = context.Hotels.Where(i => i.Name == hotelName).FirstOrDefault();
-
-            if (foundHotel != null)
-            {
-                hotel = foundHotel;
-            }
-
-            return hotel;
+            return foundHotel;
         }
 
 
         //получить список свободных номеров гостиницы нужного класса за указанную дату
         public List<Room> GetFreeRooms(DateTime date, int hotelId, RoomClasses roomClass)
         {
-            List<Room> freeRooms = new List<Room>();
+            var roomClassId = Convert.ToInt32(roomClass);
 
-            var allHotelRooms = new BookingContext()
-                .Hotels
-                .Where(i => i.Id == hotelId)
-                .Single()
-                .Rooms;
+            if (hotelId < 1) return null;
 
-            var roomClassId = Convert.ToInt32(roomClass); 
+            if (date == new DateTime()) return null;
 
-            var hotelRooms = allHotelRooms.Where(i => i.RoomClassId == roomClassId).ToList();
+            if (roomClassId == 0) return null;
 
-            var dateReservations = new BookingContext().Reservations.Where(i => i.ReservationDate == date).ToList();
+            var unreservedRooms = db.Rooms
+                .Include(r => r.RoomReservations)
+                .Where(r =>
+                !r.RoomReservations.Any(s => s.ReservationDate == date) &&
+                r.HotelId == hotelId &&
+                r.RoomClassId == roomClassId
+                )
+                .ToList();
 
-            freeRooms = hotelRooms.Where(i => dateReservations.Where(j => j.RoomId == i.Id).Count() == 0).ToList();
-
-            return freeRooms;
+            return unreservedRooms;
         }
 
         //зарезервировать номер, с проверкой на бронь и созданием записи клиента по необходимости
-        public void ReserveRoom(DateTime date, Room room, string clientPassportNumber, string clientName, DateTime clientDateBirth)
-        {
-            var allHotelRooms = new BookingContext()
-                .Hotels
-                .Where(i => i.Id == room.HotelId)
-                .Single()
-                .Rooms;
+        public RoomReservation ReserveRoom(int roomId, ClientModel clientModel)
+        { 
+            if (roomId   <1) return null;
+            if (clientModel == null) return null;
+            if (string.IsNullOrWhiteSpace(clientModel.PassportNumber)) return null;
+            clientModel.PassportNumber.Trim();
 
-            var hotelRooms = allHotelRooms
-                .Where(i => i.RoomClassId == room.RoomClassId)
-                .ToList();
+            if (string.IsNullOrWhiteSpace(clientModel.FullName)) return null;
+            clientModel.FullName.Trim();
 
-            var dateReservations = new BookingContext().Reservations
-                .Where(i => i.ReservationDate == date)
-                .ToList();
+            if (roomId < 1) return null;  
 
-            var freeRooms = hotelRooms
-                .Where(i => dateReservations.Where(j => j.RoomId == i.Id).Count() == 0)
-                .ToList();
+            var reservationRoomDate = DateTime.Now.AddDays(BookingDaysCount).Date;
 
-            bool error = false;
+            var isRoomExist = db.Rooms.Any(r =>   r.Id == roomId);
+            if (!isRoomExist) return null;
 
-            if (freeRooms.Where(i => i.Id == room.Id).ToList().Count == 0)
-                error = true;
+            var isRoomReservedOrUnexist = db.Reservations.Any(r => r.ReservationDate.Date == reservationRoomDate && r.RoomId == roomId  );
+            if (isRoomReservedOrUnexist) return null;
 
-            var client = new BookingContext()
-                .Clients
-                .Where(i => i.PassportNumber == clientPassportNumber)
-                .FirstOrDefault();
+            var ClientFromDB = new BookingContext()
+               .Clients
+               .FirstOrDefault(r => r.PassportNumber == clientModel.PassportNumber);
 
-            if (error)
-                throw new ArgumentException("Selected room already reserved");
-
-            if (client == null)
+            if (ClientFromDB == null)
             {
-                client = new Client
+                if (string.IsNullOrWhiteSpace(clientModel.FullName)) return null;
+                clientModel.FullName = clientModel.FullName.Trim();
+
+                if (clientModel.DateBirth == new DateTime()) return null; 
+
+                ClientFromDB = new Client
                 {
-                    DateBirth = clientDateBirth,
-                    PassportNumber = clientPassportNumber,
-                    FullName = clientName
+                    DateBirth = clientModel.DateBirth,
+                    PassportNumber = clientModel.PassportNumber,
+                    FullName = clientModel.FullName
                 };
 
-                var context = new BookingContext();
+                db.Add(ClientFromDB);
 
-                context.Add(client);
-
-                context.SaveChanges();
+                db.SaveChanges();
             }
 
+            var reservation = new RoomReservation()
+            {
+                ClientId = ClientFromDB.Id,
+                ReservationDate = reservationRoomDate,
+                RoomId = roomId,
+            };
 
-            var reservationContext = new BookingContext();
+            db.Add(reservation);
+            db.SaveChanges();
 
-            var reservation = new RoomReservation();
-
-            reservation.ClientId = client.Id;
-            reservation.ReservationDate = date;
-            reservation.RoomId = room.Id;
-
-            reservationContext.Add(reservation);
-            reservationContext.SaveChanges();
+            return reservation;
         }
     }
-     
 
-    
+
+
 }

@@ -13,10 +13,23 @@ namespace TestTaskForTransHost.Tests.HotelController
 
             // act
             var result = controller.GetByName(null);
-            var badResult = result as BadRequestObjectResult;
+            var notFoundResult = result as NotFoundObjectResult;
 
             // assert
-            Assert.NotNull(badResult);
+            Assert.NotNull(notFoundResult);
+        }
+        [Fact]
+        public void IfNameCorrectAndNeedTrimer()
+        {
+            // Arrange
+            Controllers.HotelController controller = new Controllers.HotelController();
+
+            // act
+            var result = controller.GetByName(" Capella Ubud ");
+            var objectResult = result as ObjectResult;
+
+            // assert
+            Assert.NotNull(objectResult);
         }
         [Fact]
         public void IfNameInParametrIsEmptyString()
@@ -26,10 +39,10 @@ namespace TestTaskForTransHost.Tests.HotelController
 
             // act
             var result = controller.GetByName("  ");
-            var badResult = result as BadRequestObjectResult;
+            var notFoundResult = result as NotFoundObjectResult;
 
             // assert
-            Assert.NotNull(badResult);
+            Assert.NotNull(notFoundResult);
         }
          
         [Fact]
@@ -40,7 +53,7 @@ namespace TestTaskForTransHost.Tests.HotelController
 
             // act
             var result = controller.GetByName("The Overlook Hotel");
-            var notFoundResult = result as  NotFoundObjectResult;
+            var notFoundResult = result as NotFoundObjectResult;
 
             // assert
             Assert.NotNull(notFoundResult);

@@ -17,11 +17,12 @@
         room_class_id_is_less_one,
         hotel_id_is_less_one,
         room_unexist,
-        selected_room_already_reserved,
+        selected_room_unexist_or_already_reserved,
         unexpected_error_during_reserve,
         unexpected_error,
         enum_room_classes_undefined,
-        value_in_enum_room_classes_unexist
+        value_in_enum_room_classes_unexist,
+        incorrect_parametrs
 
     }
 }

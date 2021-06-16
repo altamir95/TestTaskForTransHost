@@ -8,10 +8,10 @@ namespace TestTaskForTransHost.Models
         public DateTime ReservationDate { get; set; }
 
         public int RoomId { get; set; }
-        public virtual Room  Room { get; set; }
+        public  Room  Room { get; set; }
 
         public int ClientId { get; internal set; }
-        public virtual Client Client { get; set; }
+        public  Client Client { get; set; }
 
     }
 }

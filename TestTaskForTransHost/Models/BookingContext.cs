@@ -19,7 +19,6 @@ namespace TestTaskForTransHost.Models
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
-                .UseLazyLoadingProxies()
                 .UseSqlServer("workstation id=transhostdb.mssql.somee.com;packet size=4096;user id=zakariev_SQLLogin_1;pwd=9iwap7r8x2;data source=transhostdb.mssql.somee.com;persist security info=False;initial catalog=transhostdb");
         }
 

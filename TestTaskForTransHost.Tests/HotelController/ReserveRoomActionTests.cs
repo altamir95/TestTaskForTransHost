@@ -39,10 +39,13 @@ namespace TestTaskForTransHost.Tests.HotelController
             Controllers.HotelController controller = new Controllers.HotelController();
             ReserveRoomViewModel viewModel = new ReserveRoomViewModel()
             {
-                ClientDateBirth = new DateTime(),
-                ClientName = null,
-                ClientPassportNumber = null,
-                Room = new Models.Room() { HotelId = 0, RoomClassId = 0, Id = 0 }
+                Client = new ClientModel()
+                {
+                    DateBirth = new DateTime(),
+                    FullName = null,
+                    PassportNumber = null,
+                },
+                roomId = 0
             };
 
             // act 
@@ -59,14 +62,17 @@ namespace TestTaskForTransHost.Tests.HotelController
             Controllers.HotelController controller = new Controllers.HotelController();
             ReserveRoomViewModel viewModel = new ReserveRoomViewModel()
             {
-                ClientDateBirth = DateTime.Now,
-                ClientName = "ClientName",
-                ClientPassportNumber = "ClientPassportNumber",
-                Room = new Room() { HotelId = int.MaxValue, RoomClassId = int.MaxValue, Id = int.MaxValue }
+                 Client = new ClientModel()
+                 {
+                     DateBirth =DateTime.Now,
+                     FullName = "ClientName",
+                     PassportNumber="ClientPassportNumber"
+                 }, 
+                roomId = 222
             };
 
             // act
-            var result = controller.ReserveRoom(new ReserveRoomViewModel());
+            var result = controller.ReserveRoom(viewModel);
             var badResult = result as BadRequestObjectResult;
 
             // assert
