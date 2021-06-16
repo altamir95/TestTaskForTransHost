@@ -1,14 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace TestTaskForTransHost.Tests.HotelController
 {
-    public class GetFreeRooms
+    public class GetFreeRoomsActionTests
     {
         [Fact]
         public void IfReservationRoomDateTimeIsNotSpecified()
@@ -17,7 +13,7 @@ namespace TestTaskForTransHost.Tests.HotelController
             Controllers.HotelController controller = new Controllers.HotelController();
 
             // act
-            var result = controller.GetFreeRooms(new DateTime(), 1,Enums.RoomClasses.One);
+            var result = controller.GetFreeRooms(new DateTime(), 1, Enums.RoomClasses.One);
             var badResult = result as BadRequestObjectResult;
 
             // assert
@@ -30,7 +26,7 @@ namespace TestTaskForTransHost.Tests.HotelController
             Controllers.HotelController controller = new Controllers.HotelController();
 
             // act
-            var result = controller.GetFreeRooms(new DateTime(2021,1,1), 0, Enums.RoomClasses.One);
+            var result = controller.GetFreeRooms(new DateTime(2021, 1, 1), 0, Enums.RoomClasses.One);
             var badResult = result as BadRequestObjectResult;
 
             // assert
