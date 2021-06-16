@@ -10,8 +10,12 @@ namespace TestTaskForTransHost.ViewModels
     public class ReserveRoomViewModel
     {
 
-        public int roomId { get; set; } 
-        public ClientModel Client { get; set; }
-         
+        public int roomId { get; set; }
+        public string ClientPassportNumber { get; set; }
+
+        public DateTime ClientDateBirth { get; set; }
+
+        public string ClientFullName { get; set; }
+
     }
 }

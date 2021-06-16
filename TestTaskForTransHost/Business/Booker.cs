@@ -62,20 +62,14 @@ namespace TestTaskForTransHost.Business
             return unreservedRooms;
         }
 
-        //зарезервировать номер, с проверкой на бронь и созданием записи клиента по необходимости
-        public RoomReservation ReserveRoom(int roomId, ClientModel clientModel)
+        public RoomReservation ReserveRoom(int roomId,string clientPassportNumber, DateTime clientDateBirth, string clientFullName)
         {
             if (roomId < 1) return null;
-            if (clientModel == null) return null;
-            if (string.IsNullOrWhiteSpace(clientModel.PassportNumber)) return null;
-            clientModel.PassportNumber.Trim();
 
-            if (string.IsNullOrWhiteSpace(clientModel.FullName)) return null;
-            clientModel.FullName.Trim();
+            if (string.IsNullOrWhiteSpace(clientPassportNumber)) return null;
+            clientPassportNumber = clientPassportNumber.Trim();
 
-            if (roomId < 1) return null;
-
-            var reservationRoomDate = DateTime.Now.AddDays(BookingDaysCount).Date;
+            var reservationRoomDate = DateTime.Now.AddDays(BookingDaysCount).Date; 
 
             var isRoomReservedOrUnexist = db.Rooms
                 .Include(r => r.RoomReservations)
@@ -83,22 +77,23 @@ namespace TestTaskForTransHost.Business
                 .Any(s => s.ReservationDate.Date == reservationRoomDate && s.RoomId == roomId));
             if (!isRoomReservedOrUnexist) return null;
 
+
             var ClientFromDB = new BookingContext()
                .Clients
-               .FirstOrDefault(r => r.PassportNumber == clientModel.PassportNumber);
+               .FirstOrDefault(r => r.PassportNumber == clientPassportNumber);
 
             if (ClientFromDB == null)
             {
-                if (string.IsNullOrWhiteSpace(clientModel.FullName)) return null;
-                clientModel.FullName = clientModel.FullName.Trim();
+                if (string.IsNullOrWhiteSpace(clientFullName)) return null;
+                clientFullName = clientFullName.Trim(); 
 
-                if (clientModel.DateBirth == new DateTime()) return null;
+                if (clientDateBirth == new DateTime()) return null;
 
                 ClientFromDB = new Client
                 {
-                    DateBirth = clientModel.DateBirth,
-                    PassportNumber = clientModel.PassportNumber,
-                    FullName = clientModel.FullName
+                    DateBirth = clientDateBirth,
+                    PassportNumber = clientPassportNumber,
+                    FullName = clientFullName
                 };
 
                 db.Add(ClientFromDB);

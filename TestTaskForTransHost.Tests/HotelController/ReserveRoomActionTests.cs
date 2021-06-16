@@ -39,12 +39,9 @@ namespace TestTaskForTransHost.Tests.HotelController
             Controllers.HotelController controller = new Controllers.HotelController();
             ReserveRoomViewModel viewModel = new ReserveRoomViewModel()
             {
-                Client = new ClientModel()
-                {
-                    DateBirth = new DateTime(),
-                    FullName = null,
-                    PassportNumber = null,
-                },
+                ClientDateBirth=new DateTime(),
+                ClientFullName=null,
+                ClientPassportNumber=null, 
                 roomId = 0
             };
 
@@ -62,12 +59,9 @@ namespace TestTaskForTransHost.Tests.HotelController
             Controllers.HotelController controller = new Controllers.HotelController();
             ReserveRoomViewModel viewModel = new ReserveRoomViewModel()
             {
-                 Client = new ClientModel()
-                 {
-                     DateBirth =DateTime.Now,
-                     FullName = "ClientName",
-                     PassportNumber="ClientPassportNumber"
-                 }, 
+                ClientDateBirth = DateTime.Now,
+                ClientFullName = "ClientName",
+                ClientPassportNumber = "ClientPassportNumber" ,
                 roomId = 222
             };
 

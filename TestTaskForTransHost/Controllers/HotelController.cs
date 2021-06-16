@@ -46,7 +46,7 @@ namespace TestTaskForTransHost.Controllers
 
             if (viewModel == null) return BadRequest(HttpRequestValues.parametr_is_null.ToString());
 
-            var result = booker.ReserveRoom(viewModel.roomId, viewModel.Client);
+            var result = booker.ReserveRoom(viewModel.roomId, viewModel.ClientPassportNumber, viewModel.ClientDateBirth, viewModel.ClientFullName);
 
             if (result == null) return BadRequest(HttpRequestValues.selected_room_unexist_or_already_reserved.ToString());
 
